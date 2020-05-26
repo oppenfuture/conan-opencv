@@ -8,7 +8,7 @@ import os
 
 class OpenCVConan(ConanFile):
     name = "opencv"
-    version = "4.1.1"
+    version = "4.1.2"
     license = "BSD-3-Clause"
     homepage = "https://github.com/opencv/opencv"
     url = "https://github.com/conan-community/conan-opencv"
@@ -44,7 +44,7 @@ class OpenCVConan(ConanFile):
                "quirc": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "contrib": False,
+                       "contrib": True,
                        "jpeg": True,
                        "jpegturbo": False,
                        "tiff": True,
@@ -52,17 +52,17 @@ class OpenCVConan(ConanFile):
                        "png": True,
                        "jasper": True,
                        "openexr": True,
-                       "gtk": None,
-                       "nonfree": False,
+                       "gtk": 2,
+                       "nonfree": True,
                        "dc1394": True,
                        "carotene": False,
                        "cuda": False,
-                       "protobuf": True,
-                       "freetype": True,
-                       "harfbuzz": True,
+                       "protobuf": False,
+                       "freetype": False,
+                       "harfbuzz": False,
                        "eigen": True,
-                       'glog': True,
-                       "gflags": True,
+                       'glog': False,
+                       "gflags": False,
                        "gstreamer": False,
                        "openblas": False,
                        "ffmpeg": False,
@@ -91,11 +91,11 @@ class OpenCVConan(ConanFile):
             del self.options.gflags
 
     def source(self):
-        sha256 = "5de5d96bdfb9dad6e6061d70f47a0a91cee96bb35afb9afb9ecb3d43e243d217"
+        sha256 = "385dd0a9c25e67ef0dd60e022d2a2d7b17e2f36819cf3cb46aa8cdff5c5282c9"
         tools.get("{}/archive/{}.tar.gz".format(self.homepage, self.version), sha256=sha256)
         os.rename('opencv-%s' % self.version, self._source_subfolder)
 
-        sha256 = "9f85d380758498d800fec26307e389620cde8b1a2e86ab51cddc5200fbe37102"
+        sha256 = "0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b"
         tools.get("https://github.com/opencv/opencv_contrib/archive/{}.tar.gz".format(self.version), sha256=sha256)
         os.rename('opencv_contrib-%s' % self.version, 'contrib')
 
@@ -169,7 +169,7 @@ class OpenCVConan(ConanFile):
             # otherwise, PROTOBUF_UPDATE_FILES should be set to re-generate files
             self.requires.add('protobuf/3.5.2@bincrafters/stable')
         if self.options.eigen:
-            self.requires.add('eigen/3.3.7@conan/stable')
+            self.requires.add('eigen/3.2.10@oppen/testing')
         if self.options.gstreamer:
             self.requires.add('gstreamer/1.16.0@bincrafters/stable')
             self.requires.add('gst-plugins-base/1.16.0@bincrafters/stable')
@@ -421,8 +421,6 @@ class OpenCVConan(ConanFile):
                     patch_file=os.path.join("patches", "0001-fix-FindOpenEXR-to-respect-OPENEXR_ROOT.patch"))
         tools.patch(base_path=self._source_subfolder,
                     patch_file=os.path.join("patches", "fix-android-armv7-c++_static-init-crash.patch"))
-        tools.patch(base_path='contrib',
-                    patch_file=os.path.join("patches", "0001-fix-find_package-for-glog-gflags.patch"))
 
         cmake = self._configure_cmake()
         cmake.build()
